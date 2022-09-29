@@ -1,46 +1,39 @@
-name: CI
-# Event设置为main分支的pull request事件，
-# 这里的main分支相当于master分支，github项目新建是把main设置为默认分支，我懒得改了所以就保持这样吧
-on:
-  pull_request:
-    branches: main
-jobs:
-  # 只需要定义一个job并命名为CI
-  CI:
+name: GitHub Actions Demo # ci文件的名字
+on: [push] # 触发CI的条件
+jobs: # CI/CD通过执行一个个的Job来完成每个阶段的工作，这里配置每个Jobs
+  Check: # Job的名称
+    runs-on: ubuntu-latest # Runner，github托管的虚拟机环境，用来执行下面的Job命令
+    steps: # 执行步骤
+      - name: Check # 子步骤名称
+        if: runner.os != 'Windows' # 执行条件
+        uses: actions/checkout@v2 # 使用的action，检出分支，可以使用docker hub中的镜像：docker://alpine:3.8
+
+      - name: ESLintCode # ESLint 检测代码质量
+        uses: actions/setup-node@v2 # 使用node环境
+      - run: yarn # 执行命令安装依赖，也可以执行shell脚本./.github/scripts/build.sh
+      - run: yarn global add eslint && eslint ./src/*/**.js # 安装全局ESLint并检测代码
+
+      - name: StyleLintCode # 检测代码样式
+        uses: actions/setup-node@v2 # 使用node环境
+      - run: yarn # 执行命令安装依赖
+      - run: yarn global add stylelist && stylelint ./src/*/**.less # 执行检测命令
+
+  Build: # Job名称
+    needs: Check # 决定执行的顺序，通过needs，在Check任务执行完成后执行当前任务，指出数组，可以写入多个
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # 拉取项目代码
-      - name: Checkout repository
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check
         uses: actions/checkout@v2
-      # 给当前环境下载node
-      - name: Use Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: "16.x"
-      # 检查缓存
-      # 如果key命中缓存则直接将缓存的文件还原到 path 目录，从而减少流水线运行时间
-      # 若 key 没命中缓存时，在当前Job成功完成时将自动创建一个新缓存
-      - name: Cache
-        # 缓存命中结果会存储在steps.[id].outputs.cache-hit里，该变量在继后的step中可读
-        id: cache-dependencies
-        uses: actions/cache@v3
-        with:
-          # 缓存文件目录的路径
-          path: |
-            **/node_modules
-          # key中定义缓存标志位的生成方式。runner.OS指当前环境的系统。外加对yarn.lock内容生成哈希码作为key值，如果yarn.lock改变则代表依赖有变化。
-          # 这里用yarn.lock而不是package.json是因为package.json中还有version和description之类的描述项目但和依赖无关的属性
-          key: ${{runner.OS}}-${{hashFiles('**/yarn.lock')}}
-      # 安装依赖
-      - name: Installing Dependencies
-        # 如果缓存标志位没命中，则执行该step。否则就跳过该step
-        if: steps.cache-dependencies.outputs.cache-hit != 'true'
-        run: yarn install
-      # 运行代码扫描
-      - name: Running Lint
-        # 通过前面章节定义的命令行执行代码扫描
-        run: yarn lint
-      # 运行自动化测试
-      - name: Running Test
-        # 通过前面章节定义的命令行执行自动化测试
-        run: yarn test
+
+      # Runs a single command using the runners shell
+      - name: Build
+        uses: actions/setup-node@v2
+        env:
+          ACCESS_TOKEN: 70c717e886ff005c3fee6ee9948e5d99
+          BRANCH: main
+      - run: yarn
+      - run: yarn build:pre
