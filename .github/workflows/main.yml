@@ -1,46 +1,46 @@
 name: CI
-env:
-  CI: false
+# Event设置为main分支的pull request事件，
+# 这里的main分支相当于master分支，github项目新建是把main设置为默认分支，我懒得改了所以就保持这样吧
 on:
-  push:
-    branches: [main]
-permissions:
-  contents: write
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+  pull_request:
+    branches: main
 jobs:
-  # This workflow contains a single job called "build"
-  Check:
+  # 只需要定义一个job并命名为CI
+  CI:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout
+      # 拉取项目代码
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - name: ESLintCode
-        uses: actions/setup-node@v2
-      - run: npm
-      - run: npm install -g eslint && eslint ./src/*/**.js
-      - name: StyleLintCode
-        uses: actions/setup-node@v2
-      - run: npm install -g stylelint stylelint-less
-      - run: mkdir .tmp-css-check && touch .tmp-css-check/.stylelintrc.json && echo '{"plugins":["stylelint-less"],"rules":{}}' >> .tmp-css-check/.stylelintrc.json && stylelint "src/**/*.less" --config .tmp-css-check/.stylelintrc.json --aei
-  Deploy:
-    needs: Check
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
-    # Steps represent a sequence of tasks that will be executed as part of the job
-    steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: checkout
-        uses: actions/checkout@v2
-      # Runs a single command using the runners shell
-      - name: build
-        uses: actions/setup-node@v2
-        env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: main
-      - run: npm
-      - run: npm build:prod
-      - name: deploy
-        uses: JamesIves/github-pages-deploy-action@v4.3.3
+      # 给当前环境下载node
+      - name: Use Node.js
+        uses: actions/setup-node@v3
         with:
-          branch: gh-pages
-          folder: build
+          node-version: "16.x"
+      # 检查缓存
+      # 如果key命中缓存则直接将缓存的文件还原到 path 目录，从而减少流水线运行时间
+      # 若 key 没命中缓存时，在当前Job成功完成时将自动创建一个新缓存
+      - name: Cache
+        # 缓存命中结果会存储在steps.[id].outputs.cache-hit里，该变量在继后的step中可读
+        id: cache-dependencies
+        uses: actions/cache@v3
+        with:
+          # 缓存文件目录的路径
+          path: |
+            **/node_modules
+          # key中定义缓存标志位的生成方式。runner.OS指当前环境的系统。外加对yarn.lock内容生成哈希码作为key值，如果yarn.lock改变则代表依赖有变化。
+          # 这里用yarn.lock而不是package.json是因为package.json中还有version和description之类的描述项目但和依赖无关的属性
+          key: ${{runner.OS}}-${{hashFiles('**/yarn.lock')}}
+      # 安装依赖
+      - name: Installing Dependencies
+        # 如果缓存标志位没命中，则执行该step。否则就跳过该step
+        if: steps.cache-dependencies.outputs.cache-hit != 'true'
+        run: yarn install
+      # 运行代码扫描
+      - name: Running Lint
+        # 通过前面章节定义的命令行执行代码扫描
+        run: yarn lint
+      # 运行自动化测试
+      - name: Running Test
+        # 通过前面章节定义的命令行执行自动化测试
+        run: yarn test
