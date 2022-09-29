@@ -8,10 +8,10 @@ jobs: # CI/CD通过执行一个个的Job来完成每个阶段的工作，这里�
         if: runner.os != 'Windows' # 执行条件
         uses: actions/checkout@v2 # 使用的action，检出分支，可以使用docker hub中的镜像：docker://alpine:3.8
 
-      - name: ESLintCode # ESLint 检测代码质量
-        uses: actions/setup-node@v2 # 使用node环境
-      - run: yarn # 执行命令安装依赖，也可以执行shell脚本./.github/scripts/build.sh
-      - run: yarn global add eslint && eslint ./src/*/**.js # 安装全局ESLint并检测代码
+      # - name: ESLintCode # ESLint 检测代码质量
+      #   uses: actions/setup-node@v2 # 使用node环境
+      # - run: yarn # 执行命令安装依赖，也可以执行shell脚本./.github/scripts/build.sh
+      # - run: yarn global add eslint && eslint ./src/*/**.js # 安装全局ESLint并检测代码
 
       # - name: StyleLintCode # 检测代码样式
       #   uses: actions/setup-node@v2 # 使用node环境
