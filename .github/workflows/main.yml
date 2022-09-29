@@ -35,5 +35,5 @@ jobs: # CI/CD通过执行一个个的Job来完成每个阶段的工作，这里�
         env:
           ACCESS_TOKEN: 70c717e886ff005c3fee6ee9948e5d99
           BRANCH: main
-      - run: yarn
-      - run: yarn build:pre
+      - run: npm
+      - run: npm build
