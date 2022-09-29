@@ -13,10 +13,10 @@ jobs: # CI/CD通过执行一个个的Job来完成每个阶段的工作，这里�
       - run: yarn # 执行命令安装依赖，也可以执行shell脚本./.github/scripts/build.sh
       - run: yarn global add eslint && eslint ./src/*/**.js # 安装全局ESLint并检测代码
 
-      - name: StyleLintCode # 检测代码样式
-        uses: actions/setup-node@v2 # 使用node环境
-      - run: yarn # 执行命令安装依赖
-      - run: yarn global add stylelist && stylelint ./src/*/**.less # 执行检测命令
+      # - name: StyleLintCode # 检测代码样式
+      #   uses: actions/setup-node@v2 # 使用node环境
+      # - run: yarn # 执行命令安装依赖
+      # - run: yarn global add stylelist && stylelint ./src/*/**.less # 执行检测命令
 
   Build: # Job名称
     needs: Check # 决定执行的顺序，通过needs，在Check任务执行完成后执行当前任务，指出数组，可以写入多个
