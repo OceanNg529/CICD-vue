@@ -1,12 +1,12 @@
-name: Build and Deploy
-on: [push]
+name: Build and Deploy #name字段是 workflow 的名称。如果省略该字段，默认为当前 workflow 的文件名。
+on: [push] #push事件触发 workflow。
 permissions:
   contents: write
 jobs:
-  build-and-deploy:
+  build-and-deploy: #任务
     concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
-    runs-on: ubuntu-latest
-    steps:
+    runs-on: ubuntu-latest #运行主机环境
+    steps: #运行步骤
       - name: Checkout 🛎️
         uses: actions/checkout@v3
 
@@ -19,4 +19,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           folder: dist # The folder the action should deploy.
-          token: ${{ secrets.TOKEN }}
+          ssh-key: ${{ secrets.TOKEN }}
