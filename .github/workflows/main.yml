@@ -16,8 +16,8 @@ jobs:
           npm run build
 
       - name: Deploy 🚀
-        folder: site
-        ssh-key: ${{ secrets.ACCESS_TOKEN }}
         uses: JamesIves/github-pages-deploy-action@v4
+        folder: dist
+        ssh-key: ${{ secrets.ACCESS_TOKEN }}
         with:
           folder: build # The folder the action should deploy.
