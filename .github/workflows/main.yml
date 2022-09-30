@@ -19,7 +19,7 @@ jobs:
           cp dist/index.html dist/404.html
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+        uses: JamesIves/github-pages-deploy-action@releases/v4
         with:
           GITHUB_TOKEN: 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
           branch: gh-pages
