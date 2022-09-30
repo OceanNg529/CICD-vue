@@ -1,17 +1,26 @@
-name: buildAndDeploy
-on:
-  push
+name: Build and Deploy
+on: 
+  push:
+    branches:
+      - main
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 我们选择使用最新的ubuntu系统
+    runs-on: ubuntu-latest
     steps:
-    - name: checkout
-      uses: actions/checkout@master # 将代码拷贝到虚机中
- 
-    - name: buildAndDeploy
-      uses: JamesIves/github-pages-deploy-action@v4 
-      env:
-        ACCESS_TOKEN: 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 # 使用刚新建的secret
-        BRANCH: cicd-pages # 存放产物的分支名称
-        FOLDER: dist # 存放build后产物的目录
-        BUILD_SCRIPT: npm install && npm run build # 执行的命令
+      - name: Checkout 🛎️
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+
+      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+        run: |
+          yarn
+          yarn build
+          cp dist/index.html dist/404.html
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          GITHUB_TOKEN: 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
+          branch: gh-pages
+          folder: dist
