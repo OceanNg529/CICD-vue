@@ -6,7 +6,7 @@ import HelloWorld from "./components/HelloWorld.vue";
 
 <template>
   <img alt="Vue logo" src="./assets/logo.png" />
-  <HelloWorld msg="is test rollback!!!" />
+  <HelloWorld msg="is test rollback222222" />
 </template>
 
 <style>
